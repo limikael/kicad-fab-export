@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import {sexpParse, sexpCallName} from "./sexp.js";
-import {arrayify} from "./js-util.js";
+import {sexpParse, sexpCallName} from "../utils/sexp.js";
+import {arrayify} from "../utils/js-util.js";
 
 class Footprint {
 	constructor(sexp) {

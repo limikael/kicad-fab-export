@@ -1,4 +1,9 @@
-import { spawn } from 'node:child_process';
+import {fileURLToPath} from 'url';
+import {spawn} from 'node:child_process';
+
+export function dirnameFromImportMeta(meta) {
+    return fileURLToPath(new URL('.', meta.url));
+}
 
 export function runCommand(cmd, args = []) {
     return new Promise((resolve, reject) => {
