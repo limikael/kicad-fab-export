@@ -31,7 +31,7 @@ export default class PcbOrderPage {
 
 		let uploadFileButton=await this.manager.browserPage.$("#uploadFile");
 
-		await uploadFileButton.uploadFile("/home/micke/Repo/peabrain/pcb/relay/jlcpcb/gerbers.zip");
+		await uploadFileButton.uploadFile(fn);
 		await this.manager.browserPage.waitForSelector('.el-progress-bar');
 		await this.manager.browserPage.waitForSelector('.el-progress-bar', { hidden: true });
 		await new Promise(r=>setTimeout(r,1000));

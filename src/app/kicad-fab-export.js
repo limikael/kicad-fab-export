@@ -20,7 +20,10 @@ export async function kicadFabExportLogin() {
 	repl.start("> ");
 }
 
-export async function kicadFabExportUpload(options) {
+export async function kicadFabExportUpload({output, pcb}) {
+	let projectName=path.parse(pcb).name;
+
+	console.log("opening fab...");
 	let manager=new JlcManager();
 	await manager.launch();
 	await manager.page.goto();
@@ -36,8 +39,8 @@ export async function kicadFabExportUpload(options) {
 
 	await manager.page.newOrder();
 
-	console.log("uploading file...");
-	await manager.page.uploadGerbers(path.join(options.output,"gerbers.zip"));
+	console.log("uploading file: "+path.join(output,`${projectName}.zip`));
+	await manager.page.uploadGerbers(path.join(output,`${projectName}.zip`));
 
 	console.log("enabling assembly...");
 	await manager.page.enableAssembly();
@@ -51,8 +54,8 @@ export async function kicadFabExportUpload(options) {
 
 	console.log("assy page: "+await manager.page.getCurrentTab());
 	await manager.page.uploadBomAndCpl(
-		path.join(options.output,"bom.csv"),
-		path.join(options.output,"cpl.csv")
+		path.join(output,"bom.csv"),
+		path.join(output,"cpl.csv")
 	);
 
 	console.log("assy page: "+await manager.page.getCurrentTab());
@@ -70,6 +73,9 @@ export async function kicakFabExportProcess({pcb, footprintDir, tmpDir, output})
 		footprintDirs: footprintDir,
 		projectDir: path.parse(pcb).dir
 	});
+
+	const projectName=path.parse(pcb).name;
+	//console.log("project name: "+projectName);
 
 	const base=path.join(path.parse(pcb).dir,path.parse(pcb).name);
 	const pcbFile=base+".kicad_pcb";
@@ -96,7 +102,7 @@ export async function kicakFabExportProcess({pcb, footprintDir, tmpDir, output})
 		"-o",gerberDir
 	]);
 
-	await zipFilesFromDir(path.join(outputDir,"gerbers.zip"),gerberDir);
+	await zipFilesFromDir(path.join(outputDir,`${projectName}.zip`),gerberDir);
 
 	// BOM
 	await kicadCli(["sch","export","bom",schFile,
