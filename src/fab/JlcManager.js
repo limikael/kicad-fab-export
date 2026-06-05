@@ -22,6 +22,8 @@ export default class JlcManager {
 			"https://statistic-overseas.yunxinfw.com",
 			"https://cart.jlcpcb.com/api/overseas-core-platform/shoppingCart/calculateGoodsFreight",
 			"https://cart.jlcpcb.com/api/overseas-core-platform/shoppingCart/calculationGoodsCostsNew",
+			"akstat.io",
+			"https://www.googletagmanager.com"
 		]});
 	}
 

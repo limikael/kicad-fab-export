@@ -81,9 +81,6 @@ export async function kicakFabExportProcess({pcb, footprintDir, tmpDir, output})
 	const pcbFile=base+".kicad_pcb";
 	const schFile=base+".kicad_sch";
 
-	if (!tmpDir)
-		tmpDir=".kfe";
-
 	let gerberDir=path.join(tmpDir,"gerbers");
 	let outputDir=output;
 
@@ -182,6 +179,12 @@ export async function kicakFabExportProcess({pcb, footprintDir, tmpDir, output})
 }
 
 export async function kicadFabExport(options) {
+	if (!options.tmpDir)
+		options.tmpDir=".kfe";
+
+	if (!options.output)
+		options.output=path.join(options.tmpDir,"output");
+
 	if (options.process)
 		await kicakFabExportProcess(options);
 

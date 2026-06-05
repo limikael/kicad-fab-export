@@ -85,7 +85,7 @@ export default class PcbAssemblyPage {
 
 		await (await this.manager.browserPage.$("button.save-to-cart")).click();
 
-		await this.manager.browserPage.waitForNavigation();
+		await this.manager.browserPage.waitForNavigation({timeout: 60000});
 		this.manager.setPage(new CartPage());
 		await this.manager.waitForPageLoad();
 	}
