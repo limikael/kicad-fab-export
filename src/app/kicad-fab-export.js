@@ -20,7 +20,7 @@ export async function kicadFabExportLogin() {
 	repl.start("> ");
 }
 
-export async function kicadFabExportUpload({output, pcb}) {
+export async function kicadFabExportUpload({output, pcb, upload, clean, openRepl}) {
 	let projectName=path.parse(pcb).name;
 
 	console.log("opening fab...");
@@ -32,40 +32,66 @@ export async function kicadFabExportUpload({output, pcb}) {
 	if (!await manager.page.isLoggedIn())
 		throw new Error("not loged in.");
 
+	if (clean) {
+		console.log("cleaning out existing orders...");
+		let orderNames=await manager.page.getOrderNames();
+		let index=orderNames.findIndex(name=>{
+			if (name==projectName)
+				return true;
+
+			if (name.startsWith(projectName+"_"))
+				return true;
+		});
+
+		if (index>=0) {
+			await manager.page.removeItemAt(index);
+		}
+	}
+
 	/*let orderNames=await manager.page.getOrderNames();
 	let orderName=orderNames[0];
 	//console.log("opening order: "+orderName);
 	//await manager.page.openOrder(orderName);*/
 
-	await manager.page.newOrder();
+	if (upload) {
+		console.log("creating order and uploading file...");
+		await manager.page.newOrder();
 
-	console.log("uploading file: "+path.join(output,`${projectName}.zip`));
-	await manager.page.uploadGerbers(path.join(output,`${projectName}.zip`));
+		console.log("uploading file: "+path.join(output,`${projectName}.zip`));
+		await manager.page.uploadGerbers(path.join(output,`${projectName}.zip`));
 
-	console.log("enabling assembly...");
-	await manager.page.enableAssembly();
+		console.log("enabling assembly...");
+		await manager.page.enableAssembly();
 
-	console.log("configuring assembly...");
-	await manager.page.next();
-
-	console.log("assy page: "+await manager.page.getCurrentTab());
-	if (await manager.page.getCurrentTab()=="pcb")
+		console.log("configuring assembly...");
 		await manager.page.next();
 
-	console.log("assy page: "+await manager.page.getCurrentTab());
-	await manager.page.uploadBomAndCpl(
-		path.join(output,"bom.csv"),
-		path.join(output,"cpl.csv")
-	);
+		console.log("assy page: "+await manager.page.getCurrentTab());
+		if (await manager.page.getCurrentTab()=="pcb")
+			await manager.page.next();
 
-	console.log("assy page: "+await manager.page.getCurrentTab());
-	await manager.page.next();
+		console.log("assy page: "+await manager.page.getCurrentTab());
+		await manager.page.uploadBomAndCpl(
+			path.join(output,"bom.csv"),
+			path.join(output,"cpl.csv")
+		);
 
-	console.log("assy page: "+await manager.page.getCurrentTab());
-	await manager.page.selectCategoryAndSaveToCart();
+		console.log("assy page: "+await manager.page.getCurrentTab());
+		await manager.page.next();
+
+		console.log("assy page: "+await manager.page.getCurrentTab());
+		await manager.page.selectCategoryAndSaveToCart();
+	}
 
 	console.log("done...");
-	await manager.close();
+	if (openRepl) {
+		globalThis.page=manager.browserPage;
+		repl.start("> ");
+	}
+
+	else {
+		await manager.close();
+	}
 }
 
 export async function kicakFabExportProcess({pcb, footprintDir, tmpDir, output}) {
@@ -188,6 +214,6 @@ export async function kicadFabExport(options) {
 	if (options.process)
 		await kicakFabExportProcess(options);
 
-	if (options.upload)
+	if (options.upload || options.clean)
 		await kicadFabExportUpload(options);
 }

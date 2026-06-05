@@ -10,6 +10,8 @@ program
     .option("--login","Login to fab.")
     .option("--no-process","Don't process.")
     .option("--no-upload","Don't upload.")
+    .option("--no-clean","Don't remove existing orders.")
+    .option("--open-repl","Leave browser open and enter repl.")
     .argument("[pcb]","Pcb file.")
     .showHelpAfterError()
 

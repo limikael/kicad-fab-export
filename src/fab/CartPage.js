@@ -23,8 +23,40 @@ export default class CartPage {
 		await this.manager.waitForIdle();
 	}
 
+	async getVisibleConfirmButton() {
+		let elhs=await this.manager.browserPage.$$(".el-popconfirm");
+		for (let elh of elhs)
+			if (await elh.isVisible())
+				return await elh.evaluateHandle(el=>el.querySelector("button.el-button--primary"));
+	}
+
+	async removeItemAt(index) {
+		console.log("removing index: "+index);
+		let btnh;
+
+		btnh=await this.getVisibleConfirmButton();
+		if (btnh)
+			throw new Error("button already visible");
+
+		let elhs=await this.manager.browserPage.$$(".main-cart-list");
+		let delBtn=await elhs[index].evaluateHandle(el=>el.querySelector(".main-cl-del__fa"));
+		await delBtn.click();
+		await new Promise(r=>setTimeout(r,1000));
+
+		btnh=await this.getVisibleConfirmButton();
+		if (!btnh)
+			throw new Error("delete button not visible");
+
+		await btnh.click();
+		await new Promise(r=>setTimeout(r,1000));
+		await this.manager.waitForIdle();
+		btnh=await this.getVisibleConfirmButton();
+		if (btnh)
+			throw new Error("button still visible");
+	}
+
 	async getOrderNames() {
-		let elhs=await manager.browserPage.$$(".main-cart-list");
+		let elhs=await this.manager.browserPage.$$(".main-cart-list");
 		return await Promise.all(elhs.map(async elh=>
 			await elh.evaluate(el=>el.querySelector(".main-cl-name div").innerText)
 		));
