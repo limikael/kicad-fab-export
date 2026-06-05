@@ -4,8 +4,68 @@ import fs, {promises as fsp} from "fs";
 import {kicadCli} from "../pcb/kicad-util.js";
 import {zipFilesFromDir} from "../utils/archiver-util.js";
 import {parse as csvParse, stringify as csvStringify} from "csv/sync";
+import JlcManager from "../fab/JlcManager.js";
+import repl from 'node:repl';
 
-export async function kicadFabExport({pcb, footprintDir, tmpDir, output}) {
+export async function kicadFabExportLogin() {
+	let manager=new JlcManager();
+	await manager.launch();
+	await manager.page.goto();
+	await manager.waitForPageLoad();
+
+	let loggedIn=await manager.page.isLoggedIn();
+	console.log("Logged in: "+loggedIn);
+
+	globalThis.page=manager.browserPage;
+	repl.start("> ");
+}
+
+export async function kicadFabExportUpload(options) {
+	let manager=new JlcManager();
+	await manager.launch();
+	await manager.page.goto();
+	await manager.waitForPageLoad();
+
+	if (!await manager.page.isLoggedIn())
+		throw new Error("not loged in.");
+
+	/*let orderNames=await manager.page.getOrderNames();
+	let orderName=orderNames[0];
+	//console.log("opening order: "+orderName);
+	//await manager.page.openOrder(orderName);*/
+
+	await manager.page.newOrder();
+
+	console.log("uploading file...");
+	await manager.page.uploadGerbers(path.join(options.output,"gerbers.zip"));
+
+	console.log("enabling assembly...");
+	await manager.page.enableAssembly();
+
+	console.log("configuring assembly...");
+	await manager.page.next();
+
+	console.log("assy page: "+await manager.page.getCurrentTab());
+	if (await manager.page.getCurrentTab()=="pcb")
+		await manager.page.next();
+
+	console.log("assy page: "+await manager.page.getCurrentTab());
+	await manager.page.uploadBomAndCpl(
+		path.join(options.output,"bom.csv"),
+		path.join(options.output,"cpl.csv")
+	);
+
+	console.log("assy page: "+await manager.page.getCurrentTab());
+	await manager.page.next();
+
+	console.log("assy page: "+await manager.page.getCurrentTab());
+	await manager.page.selectCategoryAndSaveToCart();
+
+	console.log("done...");
+	await manager.close();
+}
+
+export async function kicakFabExportProcess({pcb, footprintDir, tmpDir, output}) {
 	let footprintLibrary=new FootprintLibrary({
 		footprintDirs: footprintDir,
 		projectDir: path.parse(pcb).dir
@@ -113,5 +173,12 @@ export async function kicadFabExport({pcb, footprintDir, tmpDir, output}) {
 	});
 
 	fs.writeFileSync(path.join(outputDir,"cpl.csv"),csvStringify(jlcCpl,{header: true}));
+}
 
+export async function kicadFabExport(options) {
+	if (options.process)
+		await kicakFabExportProcess(options);
+
+	if (options.upload)
+		await kicadFabExportUpload(options);
 }

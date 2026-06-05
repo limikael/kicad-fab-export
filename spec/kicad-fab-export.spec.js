@@ -11,7 +11,7 @@ describe("kicad-fab-export",()=>{
 		await kicadFabExport({
 			pcb: path.join(__dirname,"relay.kicad_sch"),
 			output: path.join(__dirname,"relay.out"),
-			footprintDirs: ["/home/micke/Repo.ext/kicad-footprints/","/home/micke/Repo/peabrain/pcb/"]
+			footprintDir: ["/home/micke/Repo.ext/kicad-footprints/","/home/micke/Repo/peabrain/pcb/"]
 		});
 	});
 });

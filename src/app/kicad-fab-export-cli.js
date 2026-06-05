@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 
 import {program} from "commander";
-import {kicadFabExport} from "./kicad-fab-export.js";
+import {kicadFabExport, kicadFabExportLogin} from "./kicad-fab-export.js";
 import {arrayify} from "../utils/js-util.js";
 
 program
     .description("Compile JLCPCB friendly files from KiCad pcb.")
-    .requiredOption("-o, --output <dir>","Output dir")
-    .argument("<pcb>","Pcb file.")
+    .option("-o, --output <dir>","Output dir.")
+    .option("--login","Login to fab.")
+    .option("--no-process","Don't process.")
+    .option("--no-upload","Don't upload.")
+    .argument("[pcb]","Pcb file.")
     .showHelpAfterError()
 
 program.option(
@@ -18,7 +21,20 @@ program.option(
 );
 
 await program.parseAsync();
-await kicadFabExport({
-	pcb: program.args[0],
-	...program.opts()
-});
+let options=program.opts();
+options.pcb=program.args[0];
+
+if (options.login) {
+	await kicadFabExportLogin();
+}
+
+else {
+	if (!options.pcb) {
+		console.log("error: required argument pcb missing.");
+		console.log();
+		program.help();
+		process.exit(1);
+	}
+
+	await kicadFabExport(options);
+}
