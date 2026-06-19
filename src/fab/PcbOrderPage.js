@@ -33,7 +33,7 @@ export default class PcbOrderPage {
 
 		await uploadFileButton.uploadFile(fn);
 		await this.manager.browserPage.waitForSelector('.el-progress-bar');
-		await this.manager.browserPage.waitForSelector('.el-progress-bar', { hidden: true });
+		await this.manager.browserPage.waitForSelector('.el-progress-bar', { hidden: true,  timeout: 120000});
 		await new Promise(r=>setTimeout(r,1000));
 		await this.manager.waitForIdle();
 		await new Promise(r=>setTimeout(r,1000));

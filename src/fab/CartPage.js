@@ -53,6 +53,8 @@ export default class CartPage {
 		btnh=await this.getVisibleConfirmButton();
 		if (btnh)
 			throw new Error("button still visible");
+
+		await new Promise(r=>setTimeout(r,1000));
 	}
 
 	async getOrderNames() {

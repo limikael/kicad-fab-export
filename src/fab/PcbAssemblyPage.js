@@ -104,6 +104,7 @@ export default class PcbAssemblyPage {
 			case "component":
 				await this.manager.browserPage.waitForSelector("#pane-SmtCompnent .footer button.next-btn");
 				let nextOnComp=await this.manager.browserPage.$("#pane-SmtCompnent .footer button.next-btn");
+				await new Promise(r=>setTimeout(r,2000));
 				await nextOnComp.scrollIntoView();
 				await new Promise(r=>setTimeout(r,1000));
 				await nextOnComp.click();
@@ -111,9 +112,10 @@ export default class PcbAssemblyPage {
 				//console.log("comp done...");
 				await new Promise(r=>setTimeout(r,1000));
 				await this.manager.waitForIdle();
+				await new Promise(r=>setTimeout(r,1000));
 				let compNewTab=await this.getCurrentTab();
 				if (compNewTab!="quote")
-					throw new Error("unexpected tab after comp");
+					throw new Error("unexpected tab after comp: "+compNewTab);
 				break;
 
 			default:

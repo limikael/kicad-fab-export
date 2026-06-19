@@ -29,6 +29,8 @@ export async function kicadFabExportUpload({output, pcb, upload, clean, openRepl
 	await manager.page.goto();
 	await manager.waitForPageLoad();
 
+	globalThis.page=manager.browserPage;
+
 	if (!await manager.page.isLoggedIn())
 		throw new Error("not loged in.");
 
@@ -214,6 +216,15 @@ export async function kicadFabExport(options) {
 	if (options.process)
 		await kicakFabExportProcess(options);
 
-	if (options.upload || options.clean)
-		await kicadFabExportUpload(options);
+	if (options.upload || options.clean) {
+		try {
+			await kicadFabExportUpload(options);
+		}
+
+		catch (e) {
+			console.log(e);
+			console.log("error... starting shell...");
+			repl.start("> ");
+		}
+	}
 }
